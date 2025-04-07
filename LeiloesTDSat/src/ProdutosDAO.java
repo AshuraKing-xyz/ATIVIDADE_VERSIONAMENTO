@@ -35,27 +35,27 @@ public class ProdutosDAO {
     }
     
     public ArrayList<ProdutosDTO> listarProdutos(){
-        Connection conn = new conectaDAO().connectDB();
-        ArrayList<ProdutosDTO> lista = new ArrayList<>();
+    Connection conn = new conectaDAO().connectDB();
+    ArrayList<ProdutosDTO> lista = new ArrayList<>();
+    
+    try {
+        String sql = "SELECT * FROM produtos WHERE status = 'A Venda'"; // Alteração aqui
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery();
         
-        try {
-            String sql = "SELECT * FROM produtos";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
-            
-            while(rs.next()){
-                ProdutosDTO produto = new ProdutosDTO();
-                produto.setId(rs.getInt("id"));
-                produto.setNome(rs.getString("nome"));
-                produto.setValor(rs.getInt("valor"));
-                produto.setStatus(rs.getString("status"));
-                lista.add(produto);
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao listar produtos: " + e.getMessage());
+        while(rs.next()){
+            ProdutosDTO produto = new ProdutosDTO();
+            produto.setId(rs.getInt("id"));
+            produto.setNome(rs.getString("nome"));
+            produto.setValor(rs.getInt("valor"));
+            produto.setStatus(rs.getString("status"));
+            lista.add(produto);
         }
-        return lista;
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Erro ao listar produtos: " + e.getMessage());
     }
+    return lista;
+}
     
     public void venderProduto(int id) {
         Connection conn = new conectaDAO().connectDB();
