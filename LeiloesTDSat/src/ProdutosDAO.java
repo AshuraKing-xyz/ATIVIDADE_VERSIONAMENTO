@@ -57,27 +57,45 @@ public class ProdutosDAO {
     return lista;
 }
     
-    public void venderProduto(int id) {
-        Connection conn = new conectaDAO().connectDB();
-        PreparedStatement stmt = null;
-    
+    public boolean venderProduto(int id) {
+    Connection conn = new conectaDAO().connectDB();
+    PreparedStatement stmt = null;
+    try {
+        String checkSql = "SELECT status FROM produtos WHERE id = ?";
+        stmt = conn.prepareStatement(checkSql);
+        stmt.setInt(1, id);
+        ResultSet rs = stmt.executeQuery();
+        
+        if (!rs.isBeforeFirst()) {
+            JOptionPane.showMessageDialog(null, "ID não encontrado!");
+            return false;
+        }
+        
+        rs.next();
+        if (rs.getString("status").equals("Vendido")) {
+            JOptionPane.showMessageDialog(null, "Produto já foi vendido!");
+            return false;
+        }
+
+        String updateSql = "UPDATE produtos SET status = 'Vendido' WHERE id = ?";
+        stmt = conn.prepareStatement(updateSql);
+        stmt.setInt(1, id);
+        stmt.executeUpdate();
+        
+        return true;
+        
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Erro ao vender produto: " + e.getMessage());
+        return false;
+    } finally {
         try {
-            String sql = "UPDATE produtos SET status = 'Vendido' WHERE id = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-            JOptionPane.showMessageDialog(null, "Produto vendido com sucesso!");
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao vender produto: " + e.getMessage());
-        } finally {
-            try {
-                if (stmt != null) stmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Erro ao fechar conexão: " + e.getMessage());
-            }
         }
     }
+}
     
     public ArrayList<ProdutosDTO> listarProdutosVendidos() {
     Connection conn = new conectaDAO().connectDB();
